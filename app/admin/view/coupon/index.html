@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>寿县人APP后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="__PUBLIC__/echarts/echarts.min.js"></script>
+    <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__PUBLIC__/font-awesome/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="__CSS__/admin-1.css" media="all">
+</head>
+<body class="layui-layout-body" style="overflow-y:visible;">
+
+<form class="layui-form">
+    <blockquote class="layui-elem-quote quoteBox">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <input class="layui-input" name="title" placeholder="请输入优惠券名称" id="demoReload" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <select name="merchant" lay-filter="type_id" lay-verify="required" id="option_one" lay-search="">
+                <option value="">选择或搜索选择发布商</option>
+                {foreach $merchant as $k=>$v}
+                <option value="{$v.id}">{$v.title}</option>
+                {/foreach}
+            </select>
+        </div>
+        <form class="layui-form">
+            <div class="layui-inline">
+                <a class="layui-btn  layui-btn-normal" data-type="search_banner">搜索</a>
+                <a class="layui-btn add_banner">创建优惠券</a>
+                <!--<a class="layui-btn layui-btn-danger batchDel" data-type="getCheckDelete">批量删除</a>-->
+                <a class="layui-btn layui-btn-normal" id="export"><i class="layui-icon">&#xe601;</i>导出Excel</a>
+            </div>
+        </form>
+    </blockquote>
+</form>
+
+<table id="banner" lay-filter="banner"></table>
+<script type="text/html" id="showmerchant">
+    <div>{{d.merchant.title}}</div>
+</script>
+<script type="text/html" id="showday">
+    <div>
+        {{# if(d.day==''){ }}
+        {{d.start_time}} 至 {{d.end_time}}
+        {{# }else{ }}
+        {{d.day.str}}
+        {{# } }}
+    </div>
+</script>
+<script type="text/html" id="showtype">
+    <div>
+        {{# if(d.type==1){ }}
+        直接领取
+        {{# }else if(d.type==2){ }}
+        {{d.integral}}积分兑换
+        {{# }else if(d.type==3){ }}
+        {{d.balance}}余额兑换
+        {{# }else if(d.type==5){ }}
+        卡包购买
+        {{# }else if(d.type==4){ }}
+        {{d.integral}}积分兑换 或 {{d.balance}}余额兑换
+        {{# } }}
+    </div>
+</script>
+<script type="text/html" id="showuse">
+    <div>
+        {{# if(d.use_condition.amount=='0.00'){ }}
+        无条件
+        {{# }else{ }}
+        消费满{{d.use_condition.amount}}元可用
+        {{# } }}
+    </div>
+</script>
+<script type="text/html" id="switch">
+    <input type="checkbox" name="status" value="{{d.status}}" lay-skin="switch" lay-text="开启|关闭" lay-filter="IsStatus"
+           {{ d.status== 0 ? 'checked' : '' }}>
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="update">编辑</a>
+    <!--<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>-->
+</script>
+
+</body>
+{include file="public/foot"}
+<script type="text/javascript">
+    layui.use(['form', 'table', 'jquery'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var $ = layui.$;
+        $(window).one("resize", function () {
+            $(".add_banner").click(function () {
+                var index = layui.layer.open({
+                    title: " ",
+                    type: 2,
+                    content: "publish",
+                    success: function (layero, index) {
+                        setTimeout(function () {
+                            layui.layer.tips('点击此处返回广告列表', '.layui-layer-setwin .layui-layer-close', {
+                                tips: [3, 'rgb(255, 184, 0)']
+                            });
+                        }, 500)
+                    }
+                })
+                layui.layer.full(index);
+            })
+        }).resize();
+        table.render({
+            elem: '#banner',
+            height: 'full-120',
+            width: 'full',
+            url: window.base.g_restUrl + 'coupon/get/list',
+            page: true,
+            limits: [15, 25, 45, 60],
+            limit: 15,
+            cols: [[
+                {checkbox: true, fixed: true},
+                {field: 'id', title: 'ID', width: 100, fixed: 'left', align: 'center', sort: true},
+                {field: 'merchant', title: '发布商家', width: 180, templet: '#showmerchant', align: 'center',sort: true},
+                {field: 'title', title: '优惠券名称', width: 300,},
+                {
+                    field: "status",
+                    title: '禁用状态',
+                    width: 150,
+                    sort: true,
+                    align: 'center',
+                    toolbar: "#switch",
+                    unresize: true
+                },
+                {field: 'face_value', title: '优惠券面值', width: 300,},
+                {field: 'day', title: '有效天数', width: 200, align: 'center', templet: '#showday',sort: true},
+                {field: 'number', title: '优惠券总量', width: 100, align: 'center'},
+                {field: 'receive', title: '被领取', width: 100, align: 'center',sort: true},
+                {field: 'use_number', title: '已使用', width: 100, align: 'center',sort: true},
+                {field: 'surplus', title: '剩余券', width: 100, align: 'center',sort: true},
+                {field: 'type', title: '领取条件', width: 300, align: 'center',templet: '#showtype',sort: true},
+                {field: 'use_condition', title: '使用条件', width: 300, align: 'center',templet: '#showuse',sort: true},
+                {field: 'create_time', title: '创建时间', width: 200, align: 'center', sort: true},
+                {field: 'update_time', title: '更新时间', width: 200, align: 'center', sort: true},
+                {title: '操作', width: 200, align: 'center', toolbar: '#barDemo', fixed: 'right'}
+            ]],
+            id: 'tableBanner',
+            done: function () {
+                hoverOpenImg();
+            }
+        });
+
+        var $, active = {
+            getCheckDelete: function () {
+                var checkStatus = table.checkStatus('tableBanner')
+                        , data = checkStatus.data;
+                var deList = [];
+                data.forEach(function (n, i) {
+                    deList.push(n.id);
+                });
+                if (deList != '') {
+                    layer.confirm('确定删除所选项吗？', function (index) {
+                        layer.close(index);
+                        deleteOneOrMore(deList, table);
+                    })
+                } else {
+                    layer.tips('请选择需要删除的行', $('.batchDel'), {
+                        tips: [3, '#5fb878']
+                    })
+                }
+            },
+            search_banner: function () {
+                var merchant = $('#option_one');
+                table.reload('tableBanner', {
+                    page: {
+                        curr: 1
+                    }
+                    , where: {
+                        key: {
+                            title: $("input[name='title']").val(),
+                            merchant:merchant.val()
+                        }
+                    }
+                });
+            },
+
+        };
+        $('.layui-elem-quote .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        table.on('tool(banner)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            if (layEvent === 'update') {
+                $(window).one("resize", function () {
+                    var index = layui.layer.open({
+                        title: "编辑信息",
+                        type: 2,
+                        content: "update?id=" + data.id,
+                        success: function (layero, index) {
+                            setTimeout(function () {
+                                layui.layer.tips('点击此处返回信息列表', '.layui-layer-setwin .layui-layer-close', {
+                                    tips: 3
+                                });
+                            }, 500)
+                        }
+                    })
+                    layui.layer.full(index);
+                }).resize();
+            }
+        });
+
+        table.on('edit(banner)', function (obj) {
+            var value = obj.value
+                    , data = obj.data
+                    , field = obj.field;
+            if (field == 'href_url') {
+                var datas = {
+                    href_url: value
+                }
+            }
+            if (field == 'sort') {
+                var datas = {
+                    sort: value
+                }
+            }
+            if (field == 'title') {
+                var datas = {
+                    title: value
+                }
+            }
+            update(data.id, datas);
+        });
+
+
+
+        form.on('switch(IsStatus)', function (obj) {
+            var selectIfKey = obj.othis;
+            var parentTr = selectIfKey.parents("tr");
+            var parentTrIndex = parentTr.attr("data-index");
+            var ifKey = parentTr.find(('td:eq(1)')).text().trim();
+            if (obj.elem.checked) {
+                update(ifKey, {'status': 0});
+                layer.tips('开启', obj.othis);
+            } else {
+                update(ifKey, {'status': 1});
+                layer.tips('关闭', obj.othis);
+            }
+        });
+
+
+    });
+
+    $("#export").on('click',function(){
+        window.location.href = window.base.g_restUrl + 'coupon/data/export';
+    });
+    function hoverOpenImg() {
+        var img_show = null;
+        $('td img').hover(function () {
+            var kd = $(this).width();
+            var kd1 = kd * 6;
+            var kd2 = kd * 6 + 30;
+            var img = "<img class='img_msg' src='" + $(this).attr('src') + "' style='width:" + kd1 + "px;' />";
+            img_show = layer.tips(img, this, {
+                tips: [2, 'rgba(41,41,41,.1)']
+                , area: [kd2 + 'px']
+            });
+        }, function () {
+            layer.close(img_show);
+        });
+        $('td img').attr('style', 'max-width:100%;display:block!important');
+    }
+    function deleteOneOrMore(deList, table) {
+        var params = {
+            url: 'coupon/delete?id=' + deList,
+            sCallback: function (successMsg) {
+                if (successMsg.code == 20000) {
+                    var index = top.layer.msg('批量删除中，请稍候', {icon: 16, time: false, shade: 0.5});
+                    setTimeout(function () {
+                        top.layer.close(index);
+                        top.layer.msg("删除成功", {icon: 1});
+                        layer.closeAll("iframe");
+                        table.reload('tableBanner', {});
+                    }, 2000);
+                }
+            },
+            eCallback: function (errorMsg) {
+                layer.msg('您请求的信息不存在!', {icon: 2});
+            }
+        };
+        window.base.getData(params);
+    }
+    function update(id, datas) {
+        var params = {
+            url: 'coupon/update/id?id=' + id,
+            type: 'post',
+            data: datas,
+            sCallback: function (successMsg) {
+                if (successMsg.msg == '缺少权限') {
+                    layer.msg(successMsg.msg);
+                }
+                if (successMsg.code == 20000) {
+                    var index = top.layer.msg('数据提交中，请稍候', {icon: 16, time: false, shade: 0.5});
+                    setTimeout(function () {
+                        top.layer.close(index);
+                        top.layer.msg("ok");
+                        layer.closeAll("iframe");
+                    }, 1000);
+                }
+            },
+            eCallback: function (errorMsg) {
+                if (errorMsg.responseJSON.code == 40000) {
+                    layer.msg(errorMsg.responseJSON.msg);
+                }
+            }
+        }
+        window.base.getData(params);
+    }
+
+</script>
+</html>

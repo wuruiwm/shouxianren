@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>寿县人APP后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="__PUBLIC__/echarts/echarts.min.js"></script>
+    <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__PUBLIC__/font-awesome/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="__CSS__/admin-1.css" media="all">
+</head>
+<body class="layui-layout-body" style="overflow-y:visible;">
+<form class="layui-form">
+    <blockquote class="layui-elem-quote quoteBox">
+            <div class="layui-inline" style="margin-left: 1rem;">
+              <input type="text" placeholder="入住姓名或者手机号" class="layui-input" id="name_mobile">
+            </div>
+            <div class="layui-inline" style="margin-left: 1rem;">
+                <select lay-filter="type_id" lay-verify="required" id="search_action" lay-search="">
+                    <option value="">请选择酒店</option>
+                    {volist name="data" id="v"}
+                    <option value="{$v.id}">{$v.title}</option>
+                    {/volist}
+                </select>
+            </div>
+            <div class="layui-inline" style="margin-left: 1rem;">
+                <a class="layui-btn  layui-btn-normal" id="search">搜索</a>
+            </div>
+    </blockquote>
+</form>
+<table class="layui-hide" id="table" lay-filter="table">
+  
+</table>
+<script type="text/html" id="buttons">
+  {{#  if(d.is_pay == 1 && d.status == 1){ }}
+  <a class="layui-btn layui-btn-xs" lay-event="confirm">确认入住</a>
+  {{# } }}
+  {{#  if(d.is_pay == 0 && d.status == 1){ }}
+  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="cancel">取消订单</a>
+  {{# } }}
+  {{#  if(d.status == 0){ }}
+  <span style="color: gray;font-weight:bold;">已取消订单</span>
+  {{# } }}
+  {{#  if(d.status == 2){ }}
+  <span style="color: green;font-weight:bold;">已确认入住</span>
+  {{# } }}
+</script>
+<script src="/static/public/jquery/jquery.min.js"></script>
+<script src="/static/public/layui/layui.js"></script>
+<script type="text/javascript">
+layui.use(['table','form','layer'], function(){
+  var table = layui.table;
+  var form = layui.form;
+  var layer = layui.layer;
+  table.render({
+    elem: '#table' //表格id
+    ,url:"{:url('admin/hotelorder/list')}"//list接口地址
+    ,cellMinWidth: 80 //全局定义常规单元格的最小宽度
+    ,height: 'full-120',
+    page: true,
+    limits: [15, 25, 45, 60],
+    limit: 15
+    ,cols: [[
+    //align属性是文字在列表中的位置 可选参数left center right
+    //sort属性是排序功能
+    //title是这列的标题
+    //field是取接口的字段值
+    //width是宽度，不填则自动根据值的长度
+      {field:'id', title: 'ID',align: 'center'},
+      {field:'username',title: '用户',align: 'center',width:220},
+      {field:'order',title: '订单号',align: 'center',width:220,templet:function(d){
+        if (d.orderid != '0' && d.is_pay == 1) {
+          return d.orderid;
+        }else{
+          return '未支付';
+        }
+      }},
+      {field:'merchant_name',title: '酒店名称',align: 'center',width:220},
+      {field:'hotel_name',title: '房间名称',align: 'center',width:150},
+      {field:'name',title: '姓名',align: 'center',width:100},
+      {field:'mobile', title: '手机号',align: 'center',width:150},
+      {field:'price', title: '订单总价',align: 'center',width:150},
+      {field:'num', title: '房间数',align: 'center',width:100,templet:function(d){
+        return d.num + '间';
+      }},
+      {field:'days', title: '天数',align: 'center',width:100,templet:function(d){
+        return d.days + '天';
+      }},
+      {field:'start_time', title: '进店时间',align: 'center',width:150},
+      {field:'end_time', title: '离店时间',align: 'center',width:150},
+      {field:'create_time', title: '创建时间',align: 'center',width:220},
+      {fixed:'right',title: '操作', align:'center', toolbar: '#buttons',width:150}
+    ]]    
+    ,page: true//是否分页
+  });
+  //监听
+  table.on('tool(table)', function(obj){
+      console.log(obj);
+      //data就是一行的数据
+      var data = obj.data;
+      if(obj.event === 'confirm'){
+          layer.confirm('确认入住吗', function(index){
+              $.post("{:url('admin/hotelorder/confirm')}",{id:data.id},function(res){
+                if (res.status == 1) {
+                  layui.use('table', function(){
+                        var table = layui.table;
+                        table.reload('table', { //表格的id
+                            url:"{:url('admin/hotelorder/list')}",
+                            where:{}
+                        });
+                  })
+                }
+                layer.msg(res.msg);
+              })
+          });
+      }else if(obj.event === 'cancel'){
+          layer.confirm('取消这个订单吗', function(index){
+              $.post("{:url('admin/hotelorder/cancel')}",{id:data.id},function(res){
+                if (res.status == 1) {
+                  layui.use('table', function(){
+                        var table = layui.table;
+                        table.reload('table', { //表格的id
+                            url:"{:url('admin/hotelorder/list')}",
+                            where:{}
+                        });
+                  })
+                }
+                layer.msg(res.msg);
+              })
+          });
+      }
+    });
+});
+$('#search').click(function(){
+      //传递where条件实现搜索，并且重载表格数据
+      layui.use('table', function(){
+            var table = layui.table;
+            table.reload('table', { //表格的id
+                url:"{:url('admin/hotelorder/list')}",
+                where:{
+                    'actionid':$('#search_action').val(),
+                    'name_mobile':$('#name_mobile').val()
+                }
+            });
+      })
+})
+$(document).on('keydown', function(e){
+    if(e.keyCode == 13){
+        $('#search').click();
+    }
+})
+</script>
+</html>

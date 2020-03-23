@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>寿县人APP后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="__PUBLIC__/echarts/echarts.min.js"></script>
+    <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__PUBLIC__/font-awesome/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="__CSS__/admin-1.css" media="all">
+</head>
+<body class="layui-layout-body" style="overflow-y:visible;">
+
+<form class="layui-form">
+    <blockquote class="layui-elem-quote quoteBox">
+      <div class="layui-inline" style="width: 110px;">
+            <select name="merchant" lay-filter="type_id" id="option_one">
+                <option value="">请选择行为</option>
+                <option value="1">+</option>
+                <option value="2">-</option>
+            </select>
+        </div>
+        <div class="layui-inline">
+            <div class="layui-input-inline" style="width: 300px;">
+                <input type="text" name="time" class="layui-input" id="test6" placeholder="选择时间">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <div class="layui-input-inline" style="width: 300px;">
+                <input type="text" name="order" class="layui-input"  placeholder="订单号" id="order">
+            </div>
+        </div>
+        <form class="layui-form">
+            <div class="layui-inline">
+                <a class="layui-btn  layui-btn-normal" data-type="search_banner">搜索</a>
+                <a class="layui-btn" id="export"><i class="layui-icon">&#xe601;</i>导出数据</a>
+            </div>
+        </form>
+    </blockquote>
+</form>
+
+<table id="banner" lay-filter="banner"></table>
+<script type="text/html" id="showuser">
+    <div>
+        {{d.user.nickname}}：{{d.user.mobile}}
+    </div>
+</script>
+<script type="text/html" id="showsource">
+    <div>
+        {{# if(d.source_type=='1'){ }}
+        微信
+        {{# } }}
+
+        {{# if(d.source_type=='2'){ }}
+        支付宝
+        {{# } }}
+
+        {{# if(d.source_type=='3'){ }}
+        后台操作
+        {{# } }}
+
+        {{# if(d.source_type=='4'){ }}
+        余额
+        {{# } }}
+    </div>
+</script>
+<script type="text/html" id="showtype">
+    <div>
+        {{# if(d.type=='1'){ }}
+        +
+        {{# } }}
+
+        {{# if(d.type=='2'){ }}
+        -
+        {{# } }}
+
+        {{# if(d.type=='3'){ }}
+        最终余额
+        {{# } }}
+    </div>
+</script>
+<script type="text/html" id="showuse">
+    <div>
+        {{# if(d.use_action=='1'){ }}
+        消费
+        {{# } }}
+
+        {{# if(d.use_action=='2'){ }}
+        充值
+        {{# } }}
+
+        {{# if(d.use_action=='3'){ }}
+        兑换
+        {{# } }}
+
+        {{# if(d.use_action=='4'){ }}
+        返利
+        {{# } }}
+    </div>
+</script>
+<script type="text/html" id="showStatus">
+    {{# if(d.status==1) { }}
+    <div style="color: #00B83F">已支付</div>
+    {{# } else { }}
+    <div style="color: #aa1111">待支付</div>
+    {{# } }}
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="update">编辑</a>
+    <!--<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>-->
+</script>
+
+</body>
+{include file="public/foot"}
+<script type="text/javascript">
+    layui.use(['form', 'table', 'jquery', 'laydate'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var $ = layui.$;
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#test6'
+            , range: true
+        });
+        $(window).one("resize", function () {
+            $(".add_banner").click(function () {
+                var index = layui.layer.open({
+                    title: " ",
+                    type: 2,
+                    content: "publish",
+                    success: function (layero, index) {
+                        setTimeout(function () {
+                            layui.layer.tips('点击此处返回广告列表', '.layui-layer-setwin .layui-layer-close', {
+                                tips: [3, 'rgb(255, 184, 0)']
+                            });
+                        }, 500)
+                    }
+                })
+                layui.layer.full(index);
+            })
+        }).resize();
+        table.render({
+            elem: '#banner',
+            height: 'full-120',
+            width: 'full',
+            url: window.base.g_restUrl + 'balancelog/get/list',
+            page: true,
+            limits: [15, 25, 45, 60,99999],
+            limit: 15,
+            cols: [[
+                {checkbox: true, fixed: true},
+//                {field: 'id', title: 'ID', width: 100, fixed: 'left', align: 'center', sort: true},
+                {field: 'order', title: '订单号', width: 250, align: 'center',sort: true},
+                {field: 'user', title: '用户', width: 300, edit: 'text', templet: '#showuser'},
+                {field: 'use_action', title: '操作行为', width: 100, align: 'center', sort: true,templet: '#showuse'},
+                {field: 'type', title: '运算符', width: 100, templet: '#showtype', align: 'center', sort: true},
+                {field: 'amount', title: '数目', width: 100, align: 'center', sort: true},
+                {field: 'source_type', title: '来源类型', width: 120, align: 'center', templet: '#showsource',sort: true},
+                {field: 'status', title: '支付状态', width: 120, align: 'center',sort: true,templet: '#showStatus'},
+                {field: 'remark', title: '备注说明', width: 300,sort: true},
+                {field: 'create_time', title: '支付时间', width: 200, align: 'center', sort: true},
+                {field: 'admin_nickname', title: '管理员', width: 200, align: 'center', sort: true},
+//                {title: '操作', width: 200, align: 'center', toolbar: '#barDemo', fixed: 'right'}
+            ]],
+            id: 'tableBanner',
+            done: function () {
+            }
+        });
+
+
+        var $, active = {
+            search_banner: function () {
+                table.reload('tableBanner', {
+                    page: {
+                        curr: 1
+                    }
+                    , where: {
+                        key: {
+                            type: $('#option_one').val(),
+                            time:$("input[name='time']").val(),
+                            order:$("input[name='order']").val()
+                        }
+                    }
+                });
+            },
+
+        };
+        $('.layui-elem-quote .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+
+    });
+
+    $("#export").on('click', function () {
+        var type = $('#option_one').val();
+        var time = $("input[name='time']").val();
+        var order = $("input[name='order']").val();
+        window.location.href = window.base.g_restUrl + 'balancelog/data/export?type='+type+'&time='+time+'&order='+order;
+    });
+
+</script>
+</html>

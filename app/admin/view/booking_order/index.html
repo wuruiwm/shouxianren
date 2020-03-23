@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>寿县人APP后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="__PUBLIC__/echarts/echarts.min.js"></script>
+    <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__PUBLIC__/font-awesome/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="__CSS__/admin-1.css" media="all">
+</head>
+<body class="layui-layout-body" style="overflow-y:visible;">
+
+<form class="layui-form">
+    <blockquote class="layui-elem-quote quoteBox">
+        <div class="layui-inline" style="width: 110px;">
+            <select name="merchant" lay-filter="type_id" id="option_three">
+                <option value="">请选择商户</option>
+                {foreach $merchant as $k=>$v}
+                <option value="{$v.id}">{$v.title}</option>
+                {/foreach}
+            </select>
+        </div>
+        <form class="layui-form">
+            <div class="layui-inline">
+                <a class="layui-btn  layui-btn-normal" data-type="search_banner">搜索</a>
+                <!--<a class="layui-btn add_banner">添加轮播图</a>-->
+                <!--<a class="layui-btn layui-btn-danger batchDel" data-type="getCheckDelete">批量删除</a>-->
+            </div>
+        </form>
+    </blockquote>
+</form>
+
+<table id="banner" lay-filter="banner"></table>
+<script type="text/html" id="showusername">
+    <div>{{ d.user.nickname }}</div>
+</script>
+<script type="text/html" id="showusermobile">
+    <div>{{ d.user.mobile }}</div>
+</script>
+<!--<script type="text/html" id="barDemo">-->
+    <!--<a class="layui-btn layui-btn-xs" lay-event="update">编辑</a>-->
+    <!--<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>-->
+<!--</script>-->
+
+</body>
+{include file="public/foot"}
+<script type="text/javascript">
+    layui.use(['form', 'table', 'jquery'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var $ = layui.$;
+
+        table.render({
+            elem: '#banner',
+            height: 'full-120',
+            width: 'full',
+            url: window.base.g_restUrl + 'bookingorder/read',
+            page: true,
+            limits: [15, 25, 45, 60],
+            limit: 15,
+            cols: [[
+                {checkbox: true, fixed: true},
+                {field: 'id', title: 'ID', width: 50, fixed: 'left', align: 'center', sort: true},
+                {field: 'user', title: '用户昵称', width: 200, templet: '#showusername',},
+                {field: 'user', title: '用户手机号', width: 200, templet: '#showusermobile'},
+                {field: 'merchant', title: '商家', width: 200,},
+                {
+                    field: "status",
+                    title: '处理状态',
+                    width: 150,
+                    sort: true,
+                },
+                {field: 'action', title: '预订项目', width: 200,},
+                {field: 'name', title: '预订人', width: 200, },
+                {field: 'mobile', title: '预订手机号', width: 200, },
+                {field: 'create_time', title: '创建时间', width: 200, sort: true},
+                {field: 'handle_time', title: '处理时间', width: 200, sort: true},
+            ]],
+            id: 'tableBanner',
+            done: function () {
+            }
+        });
+        var $, active = {
+            search_banner: function () {
+                var option = $('#option');
+                table.reload('tableBanner', {
+                    page: {
+                        curr: 1
+                    }
+                    , where: {
+                        key: {
+                            merchant:$("#option_three").val()
+                        }
+                    }
+                });
+            },
+
+        };
+        $('.layui-elem-quote .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+
+    });
+
+
+</script>
+</html>

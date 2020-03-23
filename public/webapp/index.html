@@ -1,0 +1,370 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>寿县人APP</title>
+   	<meta charset="UTF-8">
+    <meta name="viewport"   content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="./css/api.css" />
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    <link rel="stylesheet" type="text/css" href="./css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="./css/iconfont.css" />
+  <style>
+        .item {
+            padding: 0 .2rem;
+        }
+
+        .aui-list .aui-list-item {
+            background-size: 100% 0px !important;
+            padding: .5rem 1rem;
+        }
+
+        .aui-radio:checked,
+        .aui-radio.aui-checked,
+        .aui-checkbox:checked,
+        .aui-checkbox.aui-checked {
+            background-color: #D39B51;
+            border: solid 1px #D39B51;
+        }
+
+        .footer {
+            margin: 1.5rem 0 0 0;
+            text-align: center;
+        }
+
+        .footer>span {
+            padding: .3rem 5rem;
+            background: #D39B51;
+            color: #FFF;
+            border-radius: 5px;
+        }
+
+        .getCode {
+            right: 17px;
+            position: absolute;
+            background: #D39B51;
+            top: 1.1rem;
+            font-size: 12px;
+            color: #FFF;
+            padding: .2rem .3rem;
+            border-radius: 3px;
+        }
+
+        #btn_yzm {
+            width: 3.8rem;
+            height: 1.5rem;
+            text-align: center;
+            line-height: 1.2rem
+        }
+        .max-box{
+          margin-top: 0.5rem
+        }
+        .resqult{
+          padding:.4rem  0;
+          text-align:center;
+          font-size:1rem;
+           background: #D39B51;
+          color:#FFF;
+    }
+    
+      img.logo{
+            display: block;
+            margin: 0 auto;
+            max-width:100%;
+            margin: 0.8rem 0;
+        }
+        .logo{
+            display: inline;
+            width:2.2rem;
+            height:2.2rem;
+            border-radius: 8px;
+            vertical-align:middle;
+        }
+        button{
+            border:none;
+            background-color: rgb(238, 50, 36);
+            color:#fff;
+            font-size: 0.8rem;
+            width:4.5rem;
+            height:1.7rem;
+            text-align: center;
+            border-radius: 0.85rem;
+            line-height: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+  
+    <div style="height: 3.2rem;box-shadow: 1px 1px 2px #ccc;padding: 0 0.8rem;display: flex;justify-content: space-between;align-items: center;background-color: #D39B51;">
+        <div><img class="logo" src="./css/logo.png" alt=""></div>
+        <button onclick="submitFn()">打开</button>
+    </div>
+  
+
+  
+    <div class="max-box">
+        <ul class="aui-list aui-form-list">
+
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-label">
+                        性别
+                    </div>
+                    <div class="aui-list-item-input">
+                        <label><input class="aui-radio aui-radio1" type="radio" name="sex" value="1" checked> 男</label> &nbsp;&nbsp;&nbsp;
+                        <label><input class="aui-radio aui-radio2" type="radio" name="sex" value="2"> 女</label>
+                    </div>
+                </div>
+            </li>
+
+
+            <li class="aui-list-item" style="position: relative;">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-label">
+                        手机号
+                    </div>
+                    <div class="aui-list-item-input">
+                        <input type="number" name="tel" placeholder="请输入手机号" id="tel">
+                    </div>
+                </div>
+                <button class="getCode" id="btn_yzm">获取验证码</button>
+            </li>
+
+            <li class="aui-list-item mobileCode">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-label">
+                        验证码
+                    </div>
+                    <div class="aui-list-item-input">
+                        <input type="number" value="" name="code" placeholder="请输入验证码" id="code">
+                    </div>
+                </div>
+            </li>
+
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-label">
+                        登录密码
+                    </div>
+                    <div class="aui-list-item-input">
+                        <input type="password" value="" name="password" placeholder="请输入6-18位登录密码" id="password">
+                    </div>
+                </div>
+            </li>
+
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-label">
+                        确认密码
+                    </div>
+                    <div class="aui-list-item-input">
+                        <input type="password" value="" name="confirmpwd" placeholder="请再次输入密码" id="confirm">
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="footer">
+        <span id="register">立即注册</span>
+        <p style="padding:0.8rem 0 0.8rem 0;">已有账号？<span style="color:#D39B51" onclick="window.location.href='./login.html'">立即登录</span></p>
+        <p style="margin-top:1rem;">注册即代表阅读并同意<span style="color:#D39B51">《使用条款》</span></p>
+    </div>
+</body>
+  <script type="text/javascript" src="./js/dns.js"></script>
+  <script type="text/javascript" src='./js/aui-toast.js'></script>
+  <script src="./js/jquery.js"></script>
+  <script>
+  	$(document).ready(function(){
+    	var toast = new auiToast({});
+        getyzm();
+      	//获取验证码
+    	function getyzm() {
+        var btn_yzm = document.getElementById("btn_yzm");
+        var tel = document.getElementById("tel")
+        btn_yzm.onclick = function() {
+            var phone = tel.value;
+            if (!(/^1[3456789]\d{9}$/.test(phone))) {
+                toast.fail({
+                    title:"请输入正确合法的手机号!",
+                    duration:1500
+                });
+                return false;
+            }
+            clearInterval(timer);
+            btn_yzm.style.backgroundColor = "#ccc";
+            var time = 60;
+            var timer = null;
+            var that = this;
+            timer = setInterval(function() {
+                if (time <= 0) {
+                    that.innerHTML = "重新发送!"
+                    that.style.backgroundColor = "rgb(211, 155, 81)";
+                    document.getElementById("btn_yzm").removeAttribute('disabled');
+                    clearInterval(timer)
+                } else {
+                    that.innerHTML = time + 's'
+                    time--;
+                }
+            }, 1000);
+            document.getElementById("btn_yzm").setAttribute('disabled','disabled');
+            console.log(tel.value);
+          
+            $.ajax({
+              method:"get",
+              dataType:'jsonp',
+              data:{"mobile":tel.value},
+              url:dns+"smscode",
+              beforeSend:function(req) {
+               // req.setRequestHeader('Content-Type', 'application/json');  
+            },
+              success:function (res) {
+                console.log(res)
+              },
+              err:function (err) {
+                console.log(err)
+              }
+            })
+        }
+
+    };
+      
+      
+     $(".aui-radio1").click(function () {
+      $(this).attr("checked","checked");
+      $(".aui-radio2").removeAttr("checked");
+    });
+      
+    $(".aui-radio2").click(function () {
+      $(this).attr("checked","checked");
+      $(".aui-radio1").removeAttr("checked");
+    })
+    // 立即注册
+    var register = document.getElementById("register");
+    register.onclick = function() {
+        // 性别
+        var radioList = document.getElementsByClassName("aui-radio");
+        var sex;
+        for(var i = 0; i< radioList.length;i++){
+          if(radioList[i].checked){
+            var val = radioList[i].value;
+            if(val == 1){
+              sex = 1;
+            }else{
+              sex = 2
+            }
+          }
+        }
+        // 验证手机号
+        var phone = tel.value;
+        if (!(/^1[3456789]\d{9}$/.test(phone))) {
+          toast.fail({
+              title:"请输入正确合法的手机号!",
+              duration:1500
+          });
+            return false;
+        }
+        // 验证APp密码
+        var password = document.getElementById("password").value;
+        if (!( /^[a-zA-Z0-9]{6,18}$/.test(password))) {
+            toast.fail({
+                title:"请设置6-18位登录密码!",
+                duration:2000
+            });
+            return false;
+        }
+        // 确认APP密码
+        var repassword = document.getElementById("confirm").value;
+        if (password!=repassword) {
+            toast.fail({
+                title:"两次输入登录密码不一样，请重新输入!",
+                duration:1500
+            });
+            return false;
+        }
+        // 验证码
+        var code = document.getElementById("code").value;
+      data = {
+            mobile:phone,
+            code:code,
+            password:password,
+            repassword:repassword,
+            clause:1,
+            sex:sex
+      }
+      
+        // 点击注册
+        $.ajax({
+          type:"post",
+          dataType:'json',
+          data:JSON.stringify(data),
+        
+          contentType:'application/json',
+          url:dns+"user/reg",
+           beforeSend : function(req) {
+            req.setRequestHeader('Content-Type', 'application/json'); 
+        },
+          success:function (res) {
+            toast.success({
+                title:"注册成功!",
+                duration:1500
+            });
+            setTimeout(function () {
+             	window.location.href="http://testapp.jinshouzhou.com/coupon.html"
+            },200) 
+          },
+          error:function (err) {
+            var json = JSON.parse(err.responseText);
+            toast.fail({
+                title:json.msg,
+                duration:1500
+            });
+          }
+        })
+    }
+    
+    });
+    
+    
+          function submitFn(){
+        var browser = {
+            versions: function() {
+                      var u = navigator.userAgent,
+                            app = navigator.appVersion;
+                      return {
+                                 trident: u.indexOf('Trident') > -1,                         /*IE内核*/
+                                presto: u.indexOf('Presto') > -1,           /*opera内核*/
+                                webKit: u.indexOf('AppleWebKit') > -1, /*苹果、谷歌内核*/
+                                gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1,         /*火狐内核*/
+                                 mobile: !!u.match(/AppleWebKit.*Mobile.*/),        /*是否为移动终端*/
+                                 ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), /*ios终端*/
+                                 android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, /*android终端或者uc浏览器*/
+                                 iPhone: u.indexOf('iPhone') > -1,           /*是否为iPhone或者QQHD浏览器*/
+                                 iPad: u.indexOf('iPad') > -1,      /*是否iPad*/
+                                 webApp: u.indexOf('Safari') == -1,          /*是否web应该程序，没有头部与底部*/
+                                 souyue: u.indexOf('souyue') > -1,
+                                 superapp: u.indexOf('superapp') > -1,
+                                 weixin:u.toLowerCase().indexOf('micromessenger') > -1,
+                                 Safari:u.indexOf('Safari') > -1
+                       };
+              }(),
+                       language: (navigator.browserLanguage || navigator.language).toLowerCase()
+        };
+        if (browser.versions.ios) {
+            // window.location.href = "sinaweibohd://";//打开某手机上的某个app应用
+            setTimeout(function(){
+               $('.downloadAPP').hide();
+                window.location="https://apps.apple.com/cn/app/%E5%AF%BF%E5%8E%BF%E4%BA%BAapp/id1469348024";//如果超时就跳转到app下载页
+            },1000);
+        }
+        else if (browser.versions.android){
+            // window.location.href = "taobao://";//打开某手机上的某个app应用
+            setTimeout(function(){
+               $('.downloadAPP').hide();
+                window.location="https://a.app.qq.com/o/simple.jsp?pkgname=com.personal.revenant.jinshouzhou&from=singlemessage&isappinstalled=0";//如果超时就跳转到app下载页
+            },1000);
+        }
+    }
+  </script>
+  
+</html>

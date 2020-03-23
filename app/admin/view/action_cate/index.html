@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>寿县人APP后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="__PUBLIC__/echarts/echarts.min.js"></script>
+    <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__PUBLIC__/font-awesome/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="__CSS__/admin-1.css" media="all">
+<body class="layui-layout-body" style="overflow-y:visible;">
+<form class="layui-form">
+    <blockquote class="layui-elem-quote quoteBox">
+        <form class="layui-form">
+            <div class="layui-inline">
+                <a class="layui-btn add_">新增栏目</a>
+            </div>
+        </form>
+    </blockquote>
+</form>
+<table id="newsCate" lay-filter="newsCate"></table>
+<script type="text/html" id="switch">
+    <input type="checkbox" name="status" value="{{d.status}}" lay-skin="switch" lay-text="开启|关闭" lay-filter="IsStatus"
+           {{ d.status== 0 ? 'checked' : '' }}>
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>
+    <!--<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>-->
+</script>
+</body>
+{include file="public/foot"}
+<script type="text/javascript">
+    layui.use(['form', 'table', 'jquery'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var $ = layui.$;
+
+        $(window).one("resize", function () {
+            $(".add_").click(function () {
+                var index = layui.layer.open({
+                    title: " ",
+                    type: 2,
+                    area: ['200px', '200px'],
+                    content: "publish",
+                    success: function (layero, index) {
+                        setTimeout(function () {
+                            layui.layer.tips('点击此处返回广告列表', '.layui-layer-setwin .layui-layer-close', {
+                                tips: [3, 'rgb(255, 184, 0)']
+                            });
+                        }, 500)
+                    }
+                })
+                layui.layer.full(index);
+            })
+        }).resize();
+        table.render({
+            elem: '#newsCate',
+            height: 'full-120',
+            width: 'full',
+            url: window.base.g_restUrl + 'actioncate/read',
+            page: true,
+            limits: [15, 25, 45, 60],
+            limit: 15,
+            cols: [[
+                {checkbox: true, fixed: true},
+                {field: 'id', title: 'ID', width: 100, fixed: 'left', align: 'center', sort: true},
+                {field: 'title', title: '标题', width: 300, align: 'center', edit: 'text'},
+                {
+                    field: "status",
+                    title: '禁用状态',
+                    width: 150,
+                    sort: true,
+                    align: 'center',
+                    toolbar: "#switch",
+                    unresize: true
+                },
+                {field: 'sort', title: '排序', width: 200, edit: 'text', align: 'center'},
+                {field: 'create_time', title: '创建时间', width: 200, align: 'center', sort: true},
+                {title: '操作', width: 200, align: 'center', toolbar: '#barDemo', fixed: 'right'}
+            ]],
+            id: 'tableNews',
+        });
+        table.on('edit(newsCate)', function (obj) {
+            var value = obj.value
+                    , data = obj.data
+                    , field = obj.field;
+            if (field == 'title') {
+                var datas = {
+                    title: value
+                }
+            }
+            if (field == 'sort') {
+                var datas = {
+                    sort: value
+                }
+            }
+            update(data.id, datas);
+        });
+
+        table.on('tool(newsCate)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            if (layEvent === 'delete') {
+                layer.confirm('真的删除行么', function (index) {
+                    layer.close(index);
+                    deleteCate(data.id, obj, index)
+                });
+            }
+        });
+
+        form.on('switch(IsStatus)', function (obj) {
+            var selectIfKey = obj.othis;
+            var parentTr = selectIfKey.parents("tr");
+            var parentTrIndex = parentTr.attr("data-index");
+            var ifKey = parentTr.find(('td:eq(1)')).text().trim();
+            if (obj.elem.checked) {
+                update(ifKey, {'status': 0});
+                layer.tips('开启', obj.othis);
+            } else {
+                update(ifKey, {'status': 1});
+                layer.tips('关闭', obj.othis);
+            }
+        });
+
+    });
+
+    function update(id, datas) {
+        var params = {
+            url: 'actioncate/update?id=' + id,
+            type: 'post',
+            data: datas,
+            sCallback: function (successMsg) {
+                if (successMsg.msg == '缺少权限') {
+                    layer.msg(successMsg.msg);
+                }
+                if (successMsg.code == 20000) {
+                    var index = top.layer.msg('数据提交中，请稍候', {icon: 16, time: false, shade: 0.5});
+                    setTimeout(function () {
+                        top.layer.close(index);
+                        top.layer.msg("ok");
+                        layer.closeAll("iframe");
+                    }, 1000);
+                }
+            },
+            eCallback: function (errorMsg) {
+                if (errorMsg.responseJSON.code == 40000) {
+                    layer.msg(errorMsg.responseJSON.msg);
+                }
+            }
+        }
+        window.base.getData(params);
+    }
+    function deleteCate(id, table) {
+        var params = {
+            url: 'actioncate/delete?id=' + id,
+            sCallback: function (successMsg) {
+                if (successMsg.code == 20000) {
+                    var index = top.layer.msg('删除中，请稍候', {icon: 16, time: false, shade: 0.5});
+                    setTimeout(function () {
+                        top.layer.close(index);
+                        top.layer.msg("删除成功", {icon: 1});
+                        layer.closeAll("iframe");
+                        window.location.reload();
+                    }, 2000);
+                }
+            },
+            eCallback: function (errorMsg) {
+                layer.msg(errorMsg.responseJSON.msg, {icon: 2});
+            }
+        };
+        window.base.getData(params);
+    }
+</script>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>寿县人APP后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="__PUBLIC__/echarts/echarts.min.js"></script>
+    <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__PUBLIC__/font-awesome/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="__CSS__/admin-1.css" media="all">
+
+</head>
+<body class="layui-layout-body" style="overflow-y:visible;">
+
+<form class="layui-form">
+    <blockquote class="layui-elem-quote quoteBox">
+
+        <form class="layui-form">
+            <div class="layui-inline">
+                <!--<a class="layui-btn  layui-btn-normal" data-type="search_banner">搜索</a>-->
+                <!--<a class="layui-btn add_banner">添加轮播图</a>-->
+                <a class="layui-btn layui-btn-danger batchDel" data-type="getCheckDelete">批量删除</a>
+            </div>
+        </form>
+    </blockquote>
+</form>
+
+<table id="banner" lay-filter="banner"></table>
+<script type="text/html" id="showcontent">
+    <div>
+        {{# if(d.content ==''){}}
+        无内容
+        {{#}}}
+        <div>{{d.content}}</div>
+    </div>
+</script>
+
+<script type="text/html" id="showimg">
+    <div>
+        {{# if(d.img ==''){}}
+        无图
+        {{#}}}
+        {{# layui.each(d.img, function(index, item){ }}
+        <img src="{{item.filepath}}" style="width: 50%">
+        {{# }); }}
+    </div>
+</script>
+
+<script type="text/html" id="showuser">
+    <div>
+        {{d.user.nickname}} : {{d.user.mobile}}
+    </div>
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="view">查看评论</a>
+    <!--<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>-->
+</script>
+
+</body>
+{include file="public/foot"}
+<script type="text/javascript">
+    layui.use(['form', 'table', 'jquery'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var $ = layui.$;
+
+        var id =window.base.getQueryString('id');
+        table.render({
+            elem: '#banner',
+            height: 'full-120',
+            width: 'full',
+            url: window.base.g_restUrl + 'square/read/comment/list?id='+id,
+            page: true,
+            limits: [15, 25, 45, 60],
+            limit: 15,
+            cols: [[
+                {checkbox: true, fixed: true},
+                {field: 'id', title: 'ID', width: 100, fixed: 'left', sort: true},
+                {field: 'user', title: '用户', width: 300,templet:"#showuser"},
+                {field: 'content', title: '评论内容', width: 600,templet:"#showcontent"},
+                {field: 'create_time', title: '创建时间', width: 200, align: 'center', sort: true},
+//                {title: '操作', width: 200, align: 'center', toolbar: '#barDemo', fixed: 'right'}
+            ]],
+            id: 'tableBanner',
+        });
+        var $, active = {
+            getCheckDelete: function () {
+                var checkStatus = table.checkStatus('tableBanner')
+                        , data = checkStatus.data;
+                var deList = [];
+                data.forEach(function (n, i) {
+                    deList.push(n.id);
+                });
+                if (deList != '') {
+                    layer.confirm('确定删除所选项吗？', function (index) {
+                        layer.close(index);
+                        deleteOneOrMore(deList, table,id);
+                    })
+                } else {
+                    layer.tips('请选择需要删除的行', $('.batchDel'), {
+                        tips: [3, '#5fb878']
+                    })
+                }
+            },
+            search_banner: function () {
+                var option = $('#option');
+                table.reload('tableBanner', {
+                    page: {
+                        curr: 1
+                    }
+                    , where: {
+                        key: {
+                            type_id: option.val()
+                        }
+                    }
+                });
+            },
+        };
+        $('.layui-elem-quote .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+
+
+        table.on('tool(banner)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            if (layEvent === 'view') {
+                $(window).one("resize", function () {
+                    var index = layui.layer.open({
+                        title: "编辑信息",
+                        type: 2,
+                        content: "viewcomment?id=" + data.id,
+                        success: function (layero, index) {
+                            setTimeout(function () {
+                                layui.layer.tips('点击此处返回信息列表', '.layui-layer-setwin .layui-layer-close', {
+                                    tips: 3
+                                });
+                            }, 500)
+                        }
+                    })
+                    layui.layer.full(index);
+                }).resize();
+            }
+        });
+
+    });
+
+    function deleteOneOrMore(deList, table,id) {
+        var params = {
+            url: 'square/comment/del?ids=' + deList +'&id='+id,
+            sCallback: function (successMsg) {
+                if (successMsg.code == 20000) {
+                    var index = top.layer.msg('批量删除中，请稍候', {icon: 16, time: false, shade: 0.5});
+                    setTimeout(function () {
+                        top.layer.close(index);
+                        top.layer.msg("删除成功", {icon: 1});
+                        layer.closeAll("iframe");
+                        table.reload('tableBanner', {});
+                    }, 2000);
+                }
+            },
+            eCallback: function (errorMsg) {
+                layer.msg('您请求的信息不存在!', {icon: 2});
+            }
+        };
+        window.base.getData(params);
+    }
+
+</script>
+</html>

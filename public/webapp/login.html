@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>登录</title>
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    <link rel="stylesheet" type="text/css" href="./css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="./css/iconfont.css" />
+    <link rel="stylesheet" type="text/css" href="./css/icon/font-awesome/css/font-awesome.min.css" />
+    <style>
+        .myvip{
+          overflow: hidden;
+        }
+        .top {
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            height: 14rem;
+            background-image: url("./css/member-top.jpg");
+            margin-top: 1rem;
+        }
+
+        .top .info,
+        .item,
+        .flex-item {
+            height: 64%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            text-align: center;
+        }
+
+        .flex-item {
+            justify-content: space-between !important;
+        }
+
+        .title {
+            color: #E4C493;
+        }
+        .logininfo{
+          margin-top: 2rem
+        }
+        .logininfo .item-li {
+            border-bottom: 1px solid #EEE;
+            width: 9rem;
+            margin: 1.5rem auto;
+            padding: .4rem 0;
+        }
+
+        .logininfo .item-li input {
+            margin-right: 0.5rem;
+
+            width: 6rem !important;
+            font-size: 14px;
+            float: right;
+            display: inline-block !important;
+            height: 1rem !important;
+        }
+
+        .info-icon {
+            min-width: 1rem;
+            text-align: left;
+        }
+
+        i.fa {
+            color: #D39B51
+        }
+
+        .footer {
+            text-align: center;
+        }
+
+        .footer>span {
+            padding: .4rem 5rem;
+            background: #D39B51;
+            color: #FFF;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .thirdLogin {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .thirdLogin .line {
+            width: 3rem;
+            display: inline-block;
+            border: 1px #eee dashed;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="myvip">
+        <div class="top">
+            <div class="info">
+                <div style="margin-top:5rem;">
+                    <div>
+                        <img style="width:4rem;height:4rem;border-radius: 50%;" src="./css/applogo.jpg" alt="">
+                        <div class="title" style="margin: .5rem 0 0 0;">登录</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 登录信息 -->
+        <div class="logininfo">
+            <div class="item-li">
+                <label class="info-icon">
+                <i style="width:16px;height:16px;padding-left:4px;" class="fa fa-mobile"></i> | </label>
+                <input type="number" value="" name="mobile" placeholder="请输入您的手机号" id="mobile">
+            </div>
+            <div class="item-li" style="margin-bottom:0.5rem">
+                <label class="info-icon" for="">
+              <i class="fa fa-key"></i> | </label>
+                <input type="password" value="" name="password" placeholder="请输入您的密码" id="password">
+            </div>
+        </div>
+        <div class="footer" style="margin-top: 4rem;">
+            <!--<div style="display:flex;justify-content: space-around;padding:1rem 3.5rem 2rem 3.5rem;">
+              <div style="display:flex;justify-content: space-around;">
+                <input type="checkBox" name="" value="" id="remember" checked>
+                <p style="line-height:0.9rem;margin-left:0.3rem;">记住我</p>
+              </div>
+            </div> -->
+            <span id="btn_login" style="margin-bottom:1.1rem;">登录</span>
+            <p style="padding:1rem 0 2rem 0;">没有账号？<span onclick="goRegister();" style="color:#D39B51">立即注册</span></p>
+        </div>
+
+
+    </div>
+</body>
+<script type="text/javascript" src="./js/dns.js"></script>
+<script type="text/javascript" src="./js/aui-toast.js" ></script>
+  <script type="text/javascript" src="./js/jquery.js"></script>
+
+<script type="text/javascript">
+    var toast = new auiToast({
+        })
+    //立即注册
+    function goRegister() {
+      window.location.href="./index.html"
+    }
+    var btn_login = document.getElementById("btn_login");
+    btn_login.onclick = function () {
+      var mobile = document.getElementById("mobile");
+      var password = document.getElementById("password");
+      var mobile_val = mobile.value;
+      var password_val = password.value;
+      if(mobile.value == ''){
+        toast.fail({
+            title:"请输入手机号!",
+            duration:1500
+        });
+        return false;
+      }
+      if(password.value == ''){
+        toast.fail({
+            title:"请输入登录密码!",
+            duration:1500
+        });
+        return false;
+      }
+      var data = {
+          mobile:mobile_val,
+          password:password_val,
+        }
+     
+      $.ajax({
+        type:"post",
+        dataType:"json",
+         contentType:'application/json',
+        data:JSON.stringify(data),
+        url:dns+"user/login",
+          beforeSend : function(req) {
+            req.setRequestHeader('Content-Type', 'application/json'); 
+        },
+        success:function (res) {
+         
+          // 存储登陆时的毫秒数
+          var loginTime = new Date();
+          var getloginTime = loginTime.getTime();
+          localStorage.setItem("getloginTime",getloginTime);
+          // console.log(getloginTime);
+          //存储token有效时间
+          var cacheTime = (res.data.cache_time)*1000;
+          localStorage.setItem("cacheTime",cacheTime);
+          // console.log(cacheTime);
+          // 存储token
+          var token = res.data.token;
+          localStorage.setItem("token",token);
+          var tel = localStorage.setItem("tel",mobile_val);
+          toast.loading({
+              title:"跳转中",
+              duration:2000
+          },function(ret){
+              console.log(ret);
+              setTimeout(function(){
+                  toast.hide();
+              }, 3000)
+          });
+          setTimeout(function () {
+          window.location.href="./coupon.html"
+          },1000)
+        },
+        error:function (err) {
+          console.log(JSON.parse(err.responseText).msg);
+          var msg = JSON.parse(err.responseText).msg
+          toast.fail({
+              title:msg,
+              duration:1500
+          });
+          // console.log(JSON.stringify(err));
+        }
+      })
+
+    }
+ 
+</script>
+
+</html>

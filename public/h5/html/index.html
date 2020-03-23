@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"   content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title></title>
+    <link rel="stylesheet" href="../css/iconfont.css">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        header{
+            padding: 0.5rem 0.8rem;
+            font-size: 1.4rem;
+            font-weight: 500;
+        }
+        .head{
+            padding: 0 0.8rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        article{
+            text-indent: 2em;
+            padding: 0 0.8rem 2rem 0.8rem;
+        }
+        .head span{
+            font-size: 12px;
+        }
+        .head span:nth-of-type(1){
+            text-align: left;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .head span:nth-of-type(2){
+            font-size: 1.3rem;
+            color:red
+        }
+        .head span:nth-of-type(3){
+            font-size: 0.8rem;
+            color:rgb(95, 93, 93);
+            position: absolute;
+            bottom: 0;
+            right: 0.8rem;
+        }
+        .head span:nth-of-type(4){
+            font-size: 0.8rem;
+            color:rgb(95, 93, 93);
+            margin-right: 10px;
+            position: absolute;
+            bottom: 0;
+            right: 2.7rem;
+            margin-right: 1rem;
+        }
+        img{
+            display: block;
+            margin: 0 auto;
+            max-width:100%;
+            margin: 0.8rem 0;
+        }
+        .logo{
+            display: inline;
+            width:2.2rem;
+            height:2.2rem;
+            border-radius: 8px;
+            vertical-align:middle;
+        }
+        button{
+            border:none;
+            background-color: rgb(238, 50, 36);
+            color:#fff;
+            font-size: 0.8rem;
+            width:4.5rem;
+            height:1.7rem;
+            text-align: center;
+            border-radius: 0.85rem;
+            line-height: 1.5rem;
+        }
+    </style>
+</head>
+<body style="background-color: #fff;">
+    <div style="height: 3.2rem;box-shadow: 1px 1px 2px #ccc;padding: 0 0.8rem;display: flex;justify-content: space-between;align-items: center;background-color: #fff;">
+        <div><img class="logo" src="../image/logo.png" alt=""><span style="font-size:0.9rem;margin-left: 0.6rem;color:black">寿县人</span></div>
+        <button onclick="submitFn()">打开</button>
+    </div>
+    <header></header>
+    <div class="head"><span>寿县人APP</span><span class="iconfont icon-re"></span><span id="comment"></span><span id="read"></span></div>
+    <article></article>
+</body>
+<script src="../js/jquery-3.3.1.js"></script>
+<script src="../js/rem.js"></script>
+<script>
+    function GetQueryString(name){
+        var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);//search,查询？后面的参数，并匹配正则
+        if(r!=null)return  unescape(r[2]); return null;
+    }
+    var id = GetQueryString('id');
+    $.ajax({
+        type:'get',
+        url:'http://www.jinshouzhou.com/api/v1/news/read/independent/id',
+        data:{
+            id:id
+        },
+        success:(res)=>{
+            console.log(JSON.stringify(res));
+            var title = res.data.title;
+            $("header").html(title);
+            $("title").html(title);
+            var comment = res.data.comment_num;
+            $("#comment").html(comment+'评论');
+            var read = res.data.read_num;
+            $("#read").html(read+'阅读');
+            var content = res.data.content;
+            $("article").html(content)
+        }
+    })
+    function submitFn(){
+        var browser = {
+            versions: function() {
+                      var u = navigator.userAgent,
+                            app = navigator.appVersion;
+                      return {
+                                 trident: u.indexOf('Trident') > -1,                         /*IE内核*/
+                                presto: u.indexOf('Presto') > -1,           /*opera内核*/
+                                webKit: u.indexOf('AppleWebKit') > -1, /*苹果、谷歌内核*/
+                                gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1,         /*火狐内核*/
+                                 mobile: !!u.match(/AppleWebKit.*Mobile.*/),        /*是否为移动终端*/
+                                 ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), /*ios终端*/
+                                 android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, /*android终端或者uc浏览器*/
+                                 iPhone: u.indexOf('iPhone') > -1,           /*是否为iPhone或者QQHD浏览器*/
+                                 iPad: u.indexOf('iPad') > -1,      /*是否iPad*/
+                                 webApp: u.indexOf('Safari') == -1,          /*是否web应该程序，没有头部与底部*/
+                                 souyue: u.indexOf('souyue') > -1,
+                                 superapp: u.indexOf('superapp') > -1,
+                                 weixin:u.toLowerCase().indexOf('micromessenger') > -1,
+                                 Safari:u.indexOf('Safari') > -1
+                       };
+              }(),
+                       language: (navigator.browserLanguage || navigator.language).toLowerCase()
+        };
+        if (browser.versions.ios) {
+            // window.location.href = "sinaweibohd://";//打开某手机上的某个app应用
+            setTimeout(function(){
+                window.location="https://apps.apple.com/cn/app/%E5%AF%BF%E5%8E%BF%E4%BA%BAapp/id1469348024";//如果超时就跳转到app下载页
+            },1000);
+        }
+        else if (browser.versions.android){
+            // window.location.href = "taobao://";//打开某手机上的某个app应用
+            setTimeout(function(){
+                window.location="https://a.app.qq.com/o/simple.jsp?pkgname=com.personal.revenant.jinshouzhou&from=singlemessage&isappinstalled=0";//如果超时就跳转到app下载页
+            },1000);
+        }
+    }
+</script>
+</html>

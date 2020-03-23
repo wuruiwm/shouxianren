@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>寿县人APP后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="__PUBLIC__/echarts/echarts.min.js"></script>
+    <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__PUBLIC__/font-awesome/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="__CSS__/admin-1.css" media="all">
+<body class="layui-layout-body" style="overflow-y:visible;">
+
+<div class="tplay-body-div">
+    <div style="margin-top: 20px;">
+    </div>
+    <form class="layui-form" id="admin">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">存储方式</label>
+            <div class="layui-input-block">
+                <input type="radio" name="type" lay-filter="type" value="0" title="本地服务器">
+                <input type="radio" name="type" lay-filter="type" value="1" title="七牛云">
+            </div>
+        </div>
+
+        <div class="qiniu" style="display: none">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">AccessKey</label>
+                <div class="layui-input-inline" style="width:600px">
+                    <input name="accesskey" type="keywords" lay-verify="pass" autocomplete="off" class="layui-input"
+                           value="" placeholder="" >
+                </div>
+                <div class="layui-form-mid layui-word-aux">七牛云AccessKey,<a href="https://www.qiniu.com/"
+                                                                           target="_blank">点击申请</a></div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">SecretKey</label>
+                <div class="layui-input-inline" style="width:600px">
+                    <input name="secretkey" lay-verify="pass" autocomplete="off" class="layui-input" type="keywords"
+                           value="" placeholder="">
+                </div>
+                <div class="layui-form-mid layui-word-aux">七牛云SecretKey,<a href="https://www.qiniu.com/"
+                                                                           target="_blank">点击申请</a></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">存储名称</label>
+                <div class="layui-input-inline">
+                    <input name="storage_name" lay-verify="pass" autocomplete="off" class="layui-input" type="keywords"
+                           value="" placeholder="">
+                </div>
+                <div class="layui-form-mid layui-word-aux">七牛云存储空间名称</div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">外链默认域名</label>
+                <div class="layui-input-inline">
+                    <input name="prefix_url" lay-verify="pass" autocomplete="off" class="layui-input" type="keywords"
+                           value="" placeholder="">
+                </div>
+                <div class="layui-form-mid layui-word-aux">七牛云存储外链默认域名</div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="btnSubmit">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+</body>
+{include file="public/foot"}
+<script type="text/javascript">
+
+
+    layui.use(['form', 'table', 'jquery'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var $ = layui.$;
+
+        var params = {
+            url: 'qiniu/read',
+            sCallback: function (successMsg) {
+                $("input[name='accesskey']").val(successMsg.data.accesskey);
+                $("input[name='secretkey']").val(successMsg.data.secretkey);
+                $("input[name='storage_name']").val(successMsg.data.storage_name);
+                $("input[name='prefix_url']").val(successMsg.data.prefix_url);
+                if (successMsg.data.type == 0) {
+                    $('.qiniu').hide();
+                    $('input[name="type"]:eq(0)').prop('checked', true)
+                } else {
+                    $('.qiniu').show();
+                    $('input[name="type"]:eq(1)').prop('checked', true)
+                }
+                form.render();
+            },
+            eCallback: function (errorMsg) {
+                layer.msg('您请求的信息不存在!', {icon: 2});
+            }
+        }
+
+
+        window.base.getData(params);
+
+        form.on('submit(btnSubmit)', function (data) {
+            var formData = data.field;
+            var params = {
+                url: "qiniu/save",
+                type: 'post',
+                data: formData,
+                sCallback: function (successMsg) {
+                    console.log(successMsg);
+                    if (successMsg.msg == '缺少权限') {
+                        layer.msg(successMsg.msg);
+                    }
+                    if (successMsg.code == 20000) {
+                        var index = top.layer.msg('数据提交中，请稍候', {icon: 16, time: false, shade: 0.5});
+                        setTimeout(function () {
+                            top.layer.close(index);
+                            top.layer.msg("修改成功", {icon: 1});
+                            layer.closeAll("iframe");
+                        }, 1000);
+                    }
+                },
+                eCallback: function (errorMsg) {
+                    if (errorMsg.responseJSON.code == '40000') {
+                        layer.msg(errorMsg.responseJSON.msg);
+                    }
+                }
+            }
+            window.base.getData(params);
+            return false;
+        });
+
+        form.on('radio(type)', function (data) {
+            if (data.value == 0) {
+                $('.qiniu').hide();
+            } else {
+                $('.qiniu').show();
+            }
+            form.render();
+        });
+
+    });
+</script>
+</html>

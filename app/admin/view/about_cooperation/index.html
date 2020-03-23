@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>寿县人APP后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="__PUBLIC__/echarts/echarts.min.js"></script>
+    <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__PUBLIC__/font-awesome/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="__CSS__/admin-1.css" media="all">
+<body class="layui-layout-body" style="overflow-y:visible;">
+
+<div class="tplay-body-div">
+    <div style="margin-top: 20px;">
+    </div>
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">头图</label>
+            <div class="layui-upload-drag" id="test1">
+                <img class="layui-upload-img" id="img" src="/static/admin/images/upload.png"
+                     style="width: 100px;height: 100px;">
+                <p id="demoText"></p>
+                <input type="hidden" name="img" class="img_id">
+                <div class="layui-form-mid layui-word-aux">建议分辨率：750*350</div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">标题</label>
+            <div class="layui-input-block" style="width:600px">
+                <input name="title" type="keywords" lay-verify="pass" autocomplete="off" class="layui-input"
+                       value="" placeholder="">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">文本域</label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入内容" class="layui-textarea" name="content" id="container1"
+                          style="border:0;padding:0"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="btnSubmit">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+</body>
+{include file="public/foot"}
+
+<script type="text/javascript">
+    layui.use(['form', 'table', 'jquery', 'upload'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var upload = layui.upload;
+        var $ = layui.$;
+
+        var uploadInst = upload.render({
+            elem: '#test1'
+            , url: '/adminapi/upload'
+            , done: function (res) {
+                if (res.code == '20000') {
+                    $('#img').attr('src', res.data.src);
+                    $('#img').css({"width": '750', "height": '380'});
+                    $('.img_id').val(res.data.id);
+                    layer.msg('上传成功');
+                } else {
+                    layer.msg('上传失败');
+                }
+            }
+            , error: function () {
+                var demoText = $('#demoText');
+                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                demoText.find('.demo-reload').on('click', function () {
+                    uploadInst.upload();
+                });
+            }
+        });
+        var params = {
+            url: 'about/cooperation/read',
+            sCallback: function (successMsg) {
+                $("input[name='img']").val(successMsg.data.img.id);
+                $('#img').attr('src', successMsg.data.img.url);
+                $('#img').css({"width": '750', "height": '350'});
+                $("input[name='title']").val(successMsg.data.title);
+                ue.setContent(successMsg.data.content);
+                form.render();
+            },
+            eCallback: function (errorMsg) {
+                layer.msg('您请求的信息不存在!', {icon: 2});
+            }
+        }
+        window.base.getData(params);
+        form.on('submit(btnSubmit)', function (data) {
+            var formData = data.field;
+            var params = {
+                url: "about/cooperation/save",
+                type: 'post',
+                data: formData,
+                sCallback: function (successMsg) {
+                    if (successMsg.msg == '缺少权限') {
+                        layer.msg(successMsg.msg);
+                    }
+                    if (successMsg.code == 20000) {
+                        var index = top.layer.msg('数据提交中，请稍候', {icon: 16, time: false, shade: 0.5});
+                        setTimeout(function () {
+                            top.layer.close(index);
+                            top.layer.msg("修改成功", {icon: 1});
+                            layer.closeAll("iframe");
+                        }, 1000);
+                    }
+                },
+                eCallback: function (errorMsg) {
+                    if (errorMsg.responseJSON.code == '40000') {
+                        layer.msg(errorMsg.responseJSON.msg);
+                    }
+                }
+            }
+            window.base.getData(params);
+            return false;
+        });
+
+
+    });
+</script>
+
+
+<!-- 加载编辑器的容器 -->
+<script id="container1" name="content" type="text/plain">这里写你的初始化内容</script>
+<!-- 配置文件 -->
+<script type="text/javascript" src="__PUBLIC__/ueditor/ueditor.config.js"></script>
+<!-- 编辑器源码文件 -->
+<script type="text/javascript" src="__PUBLIC__/ueditor/ueditor.all.js"></script>
+<!-- 实例化编辑器 -->
+<script type="text/javascript">
+    var ue = UE.getEditor('container1');
+</script>
+
+
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>寿县人APP后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="__PUBLIC__/echarts/echarts.min.js"></script>
+    <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__PUBLIC__/font-awesome/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="__CSS__/admin-1.css" media="all">
+<body class="layui-layout-body" style="overflow-y:visible;">
+
+<div class="tplay-body-div">
+    <div style="margin-top: 20px;">
+    </div>
+    <form class="layui-form">
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">返积分</label>
+            <div class="layui-input-inline" style="width:600px">
+                <input name="integral" type="keywords" lay-verify="pass" autocomplete="off" class="layui-input"
+                       value="" placeholder="">
+            </div>
+            <div class="layui-form-mid layui-word-aux">百分比，请输入0-100的数字，0表示不返</div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">返余额</label>
+            <div class="layui-input-inline">
+                <input name="balance" lay-verify="pass" autocomplete="off" class="layui-input" type="keywords"
+                       value="" placeholder="">
+            </div>
+            <div class="layui-form-mid layui-word-aux">百分比，请输入0-100的数字，0表示不返</div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">操作</label>
+            <div class="layui-input-block">
+                <input type="radio" name="is_support" value="1" title="是"/>
+                <input type="radio" name="is_support" value="2" title="否" checked="checked"/>
+            </div>
+            <div class="layui-form-mid layui-word-aux">后台操作是否支持反积分反余额</div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="btnSubmit">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+</body>
+{include file="public/foot"}
+
+<script type="text/javascript">
+
+
+    layui.use(['form', 'table', 'jquery'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var $ = layui.$;
+
+
+        var params = {
+            url: 'rechargeconfig/read',
+            sCallback: function (successMsg) {
+                $("input[name='integral']").val(successMsg.data.integral);
+                $("input[name='balance']").val(successMsg.data.balance);
+
+                if (successMsg.data.is_support == '1') {
+                    $("input[name='is_support']").eq(0).prop('checked', true);
+                } else {
+                    $("input[name='is_support']").eq(1).prop('checked', true);
+                }
+                form.render();
+            },
+            eCallback: function (errorMsg) {
+                layer.msg('您请求的信息不存在!', {icon: 2});
+            }
+        }
+        window.base.getData(params);
+
+
+        form.on('submit(btnSubmit)', function (data) {
+            data.field.is_support = $("input[name='is_support']:checked ").val();
+            var formData = data.field;
+
+            var params = {
+                url: "rechargeconfig/save",
+                type: 'post',
+                data: formData,
+                sCallback: function (successMsg) {
+                    console.log(successMsg);
+                    if (successMsg.msg == '缺少权限') {
+                        layer.msg(successMsg.msg);
+                    }
+                    if (successMsg.code == 20000) {
+                        var index = top.layer.msg('数据提交中，请稍候', {icon: 16, time: false, shade: 0.5});
+                        setTimeout(function () {
+                            top.layer.close(index);
+                            top.layer.msg("修改成功", {icon: 1});
+                            layer.closeAll("iframe");
+                        }, 1000);
+                    }
+                },
+                eCallback: function (errorMsg) {
+                    if (errorMsg.responseJSON.code == '40000') {
+                        layer.msg(errorMsg.responseJSON.msg);
+                    }
+                }
+            }
+            window.base.getData(params);
+            return false;
+        });
+
+
+    });
+</script>
+</html>

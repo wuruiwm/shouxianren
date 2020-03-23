@@ -1,0 +1,122 @@
+<!--
+ * @Author: 傍晚升起的太阳
+ * @QQ: 1250201168
+ * @Email: wuruiwm@qq.com
+ * @Date: 2019-11-25 09:53:05
+ * @LastEditors: 傍晚升起的太阳
+ * @LastEditTime: 2019-11-25 15:16:11
+ -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>寿县人APP后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="__PUBLIC__/echarts/echarts.min.js"></script>
+    <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__PUBLIC__/font-awesome/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="__CSS__/admin-1.css" media="all">
+</head>
+<body class="layui-layout-body" style="overflow-y:visible;">
+<form class="layui-form">
+    <blockquote class="layui-elem-quote quoteBox">
+            <div class="layui-inline" style="margin-left: 2rem;">
+                <a class="layui-btn add">添加卡包</a>
+            </div>
+            <div class="layui-inline" style="margin-left: 2rem;">
+                <div class="layui-input-inline">
+                    <input class="layui-input" placeholder="请输入卡包名称" id="title">
+                </div>
+            </div>
+            <div class="layui-inline" style="margin-left: 1rem;">
+                <a class="layui-btn  layui-btn-normal" id="search">搜索</a>
+            </div>
+    </blockquote>
+</form>
+<table class="layui-hide" id="table" lay-filter="table">
+  
+</table>
+<script type="text/html" id="buttons">
+  <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script src="/static/public/jquery/jquery.min.js"></script>
+<script src="/static/public/layui/layui.js"></script>
+<script type="text/javascript">
+layui.use(['table','form','layer'], function(){
+  var table = layui.table;
+  var form = layui.form;
+  var layer = layui.layer;
+  table.render({
+    elem: '#table' //表格id
+    ,url:"{:url('admin/coupon/bag_list')}"//list接口地址
+    ,cellMinWidth: 80 //全局定义常规单元格的最小宽度
+    ,height: 'full-120',
+    page: true,
+    limits: [15, 25, 45, 60],
+    limit: 15
+    ,cols: [[
+    //align属性是文字在列表中的位置 可选参数left center right
+    //sort属性是排序功能
+    //title是这列的标题
+    //field是取接口的字段值
+    //width是宽度，不填则自动根据值的长度
+      {field:'id', title: 'ID',align: 'center'},
+      {field:'title',title: '卡包标题',align: 'center'},
+      {field:'price',title: '卡包价格',align: 'center'},
+      {field:'create_time', title: '创建时间',align: 'center'},
+      {field:'update_time', title: '最后修改时间',align: 'center'},
+      {fixed:'right',title: '操作', align:'center', toolbar: '#buttons'}
+    ]]
+    ,page: true//是否分页
+  });
+  //监听
+  table.on('tool(table)', function(obj){
+      //data就是一行的数据
+      var data = obj.data;
+      if(obj.event === 'del'){
+        layer.confirm('真的删除吗', function(index){
+              $.post("{:url('admin/coupon/bag_del')}",{id:data.id},function(res){
+                if (res.status == 1) {
+                    obj.del();//删除表格这行数据
+                }
+                layer.msg(res.msg);
+              })
+          });
+      }else if(obj.event === 'edit'){
+        var index = layer.open({
+            type: 2,
+            content: "{:url('admin/coupon/bag_edit')}"+'?id='+data.id,
+            maxmin: true,
+            title:'编辑卡包'
+        });
+        layer.full(index);
+      }
+    });
+});
+$('#search').click(function(){
+      //传递where条件实现搜索，并且重载表格数据
+      layui.use('table', function(){
+            var table = layui.table;
+            table.reload('table', { //表格的id
+                url:"{:url('admin/coupon/bag_list')}",
+                where:{
+                    'title':$('#title').val(),
+                }
+            });
+      })
+})
+$('.add').click(function(){
+    var index = layer.open({
+        type: 2,
+        content: "{:url('admin/coupon/bag_add')}",
+        maxmin: true,
+        title:'添加卡包'
+    });
+    layer.full(index);
+})
+</script>
+</html>
